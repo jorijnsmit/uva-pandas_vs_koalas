@@ -1,13 +1,14 @@
 name: pandas_vs_koalas
 channels:
   - conda-forge
+  - cyclus
 dependencies:
   - arrow-cpp
   - cython
   - htop
   - ipyparallel
   - koalas
-  - openjdk
+  - java-jdk
   - pandas
   - pip
   - pyarrow
