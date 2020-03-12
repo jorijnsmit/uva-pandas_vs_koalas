@@ -2,15 +2,15 @@ name: pandas_vs_koalas
 channels:
   - conda-forge
 dependencies:
-  - arrow-cpp=0.16.0
-  - cython=0.29.15
+  - arrow-cpp
+  - cython
   - google-cloud-storage
-  - openjdk=11.0.1
-  - pandas=1.0.1
-  - pip=20.0.2
-  - pyarrow=0.14.1
-  - python=3.7.6
-  - pyspark=2.4.5
+  - openjdk
+  - pandas
+  - pip
+  - pyarrow
+  - python=3.7
+  - pyspark
   - pip:
-    - ipyparallel=6.2.4
-    - koalas=0.29.0
+    - ipyparallel
+    - koalas
