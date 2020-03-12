@@ -2,8 +2,9 @@ name: pandas_vs_koalas
 channels:
   - conda-forge
 dependencies:
-  - python=3.7
+  - python
   - cython
+  - openjdk
   - arrow-cpp
   - pyarrow
   - pyspark
