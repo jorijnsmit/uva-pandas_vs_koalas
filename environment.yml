@@ -4,6 +4,9 @@ channels:
 dependencies:
   - arrow-cpp
   - cython
+  - htop
+  - ipyparallel
+  - koalas
   - openjdk
   - pandas
   - pip
@@ -12,5 +15,3 @@ dependencies:
   - pyspark
   - pip:
     - gsutil
-    - ipyparallel
-    - koalas
