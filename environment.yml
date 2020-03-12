@@ -6,6 +6,7 @@ dependencies:
   - cython
   - arrow-cpp
   - pyarrow
+  - pyspark
   - pandas
   - pip
   - pip:
