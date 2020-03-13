@@ -11,7 +11,7 @@ dependencies:
   - pandas
   - pip
   - pyarrow=0.8.0
-  - python=3.7
+  - python
   - pyspark
   - pip:
     - gsutil
