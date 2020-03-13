@@ -10,8 +10,8 @@ dependencies:
   - openjdk
   - pandas
   - pip
-  - pyarrow=0.8.0
-  - python
+  - pyarrow
+  - python=3.7
   - pyspark
   - pip:
     - gsutil
