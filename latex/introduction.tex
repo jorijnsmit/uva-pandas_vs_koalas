@@ -1,0 +1,32 @@
+\section{Introduction}
+
+Over the last year or so, the data analysis and manipulation tool \texttt{pandas} \cite{mckinney2011pandas} has seen its popularity rise. Because it has been built on top of \texttt{Python}, it is super easy to incorporate into bigger programming projects. The API is also very \textit{pythonic} in the sense that code written in \texttt{pandas} is very readable and easy to understand. Alternatives such as \texttt{R} or \texttt{MATLAB} lack both this portability and readability.
+
+One thing \texttt{pandas} isn't so good at however is efficiency. Python, being an interpreted and a dynamically typed programming language, is not the fastest languages out there. The fact that \texttt{pandas} is built on top of that then doesn't help. Yes, \texttt{pandas} uses a lot of \texttt{numpy}\footnote{\url{https://numpy.org/}} where possible and even \texttt{Cython}\footnote{\url{https://cython.org/}} in certain cases \cite[p.~4]{mckinney2012python}---which is great---but this only solves part of the issues.
+
+A more pressing aspect of \texttt{pandas}' efficiency is in regards to the volume of the data: its memory use. In order to analyse or manipulate a dataset, \texttt{pandas} needs to fully load it into memory. A first problem we then encounter is that there is quite some memory overhead; for example a simple comma-separated values (CSV) file of 30.2MB already needs 47.8MB of memory as a \texttt{pandas.DataFrame} And this is before performing any alterations! Does this mean we have to reserve roughly twice the storage space in memory in order to just look at the data?
+
+Let's say we take this memory overhead for granted. An obvious question then becomes: what happens when the dataset doesn't fit in memory anymore? Are we then restricted from using \texttt{pandas} completely? Is \texttt{pandas} only suitable for "laptop sized" or "small" data?
+
+\subsection{Single Node Approach}
+
+Simply loading in a file too big for memory will freeze \texttt{Python}. No warning, just an unusable session. The solution the \texttt{pandas} library offers to this is \textit{chunking}. By chunking the data into smaller pieces, we can just iterate through the data step by step until all is processed. This might offer a solution in cases where the processing steps are known. However, running ad hoc analysis might provide more of a challenge. For instance, let's say I am interested in the maximum of a column. Let's also say that the total size of the raw file is of such a size that we are forced to load it into memory in chunks. Does \texttt{.max()} now return the maximum of the chunk or of the whole data? If the former is the case, analysis using chunks becomes practically impossible; we can only perform calculations on parts of the data. In the latter case, all chunks have to be read completely for every command. This can become tremendously slow. Is analysis of such big datasets still feasible?
+
+\subsection{Parallel Approach}
+
+A very promising solution to these limits of \texttt{pandas} is \texttt{Koalas}, introduced last year by Databricks\cite{koalas_announced}. It tries to bridge the gap between \texttt{pandas} and Apache's \texttt{Spark}\footnote{\url{https://spark.apache.org/}}, a big data processing engine. By making the \texttt{pandas} API available in a big data environment, \texttt{Koalas} users are able to analyse their data in the same fashion they are used to on a single node. On the background however, the computations are performed in parallel by Spark.
+
+\texttt{Dask} provides a similar alternative to \texttt{pandas}' way of representing a dataset: \texttt{dask.dataframe}\footnote{\url{https://docs.dask.org/en/latest/dataframe.html}}. Again, it mimics the \texttt{pandas} API and parallelises it quietly in the background.
+
+For both of these packages however, we should ask whether it offers all the features and functions \texttt{pandas} has. If it does, is it worth just always using these packages instead? Or; when does one need to make the switch from single to parallel node? And in the case these parallel packages are not feature complete, how do we go about performing the missing functions?
+
+In their announcement, Databricks talks about a "easy transition" from \texttt{pandas} to Apache Spark. Surely this would be a great solution; if both packages let themselves be used in exactly the same fashion, one could even contemplate dropping \texttt{pandas} altogether and always working with \texttt{Koalas}. It would be just a fast locally and at the same time be directly deployable on a parallel machine.
+
+The main question that I want to answer in the rest of this paper is the following: \textbf{when a \texttt{pandas} dataframe becomes too big for memory, can Koalas provide an easy transition to parallel processing and how much better does it then perform?}
+
+% What is the problem?
+% Why is it interesting and important?
+% Why is it hard? (E.g., why do naive approaches fail?)
+% Why hasn't it been solved before? (Or, what's wrong with previous proposed solutions? How does mine differ?)
+% What are the key components of my approach and results? Also include any specific limitations.
+% Also include references to and short description of related work as part of the first chapter.

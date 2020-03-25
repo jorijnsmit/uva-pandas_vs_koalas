@@ -1,0 +1,30 @@
+\section{Implementation}
+
+In order to make the comparison described above, we need data. I decided on a dataset of historical trading data of cryptocurrencies. It is numerical, requires light computation but is big enough to fill a regular laptop's memory twice.
+
+In total the dataset is 17GB and consists of 198 CSV files, each file containing the full history of a single pair of two currencies. Every row summarises a minute of trading data: candlestick data (opening, high, low and closing price), volume, amount of trades and more. The dataset goes back to 2017, so for well-traded pairs this means a CSV file with well over 1 million rows.\footnote{A newer version of this dataset can now be found at \url{https://www.kaggle.com/jorijnsmit/binance-full-history}. Note however it now is made up of Parquet instead of CSV files, compressing the size of the dataset by a factor of 5.}
+
+\subsection{Goal}
+
+The eventual goal is to combine all the 198 pairs into one dataframe. For simplicity's sake, all the price data of a single minute will be brought back to one single decimal and \textit{all} the other columns will be dropped. This will leave us with 198 clean time series (one for each pair) which can then be joined using their timestamp. Minutes in which no trades took place (and thus no data is available) will be forward filled in with the last known price. This will result in a clean dataframe which is well-suited for further analysis.
+
+\subsection{Single Node Approach}
+
+Instead of trying to load in all files at once, the transformation was performed on a sample of the data first. This made it easy to see what exactly was happening while it was being performed. Once that proof of concept worked it was scaled up to include all files.
+
+Using a chunking approach, the script (see the appendix for source code) loops over all the filenames found in the data folder and performs the following steps:
+\begin{enumerate}
+    \item load file into memory as a \texttt{pandas.DataFrame}
+    \item compute a proper \texttt{pandas.DatetimeIndex} based on the timestamp column
+    \item compute a new column with a single price for each minute by averaging the open and the close price
+    \item join this new column to the dataframe \texttt{result}
+    \item resample the \texttt{result} dataframe to 1 minute intervals and forward fill missing entries.
+\end{enumerate}
+
+Resampling aligns timestamps that are not exactly the same but do fall within the same time span (in this case that of 1 minute).
+
+\subsection{Parallel Approach}
+
+Porting the code to a parallel approach is rather straight-forward; only slight adjustments were needed (again, see appendix for the source). In theory, Databricks states that the only change needed is to replace the \texttt{pandas} package by \texttt{databricks.koalas}. However, a first difficulty arose when creating an empty dataframe for each subsequent dataframe to be joined on. Apparently \texttt{koalas} is not able to create such an object yet.\footnote{\url{https://github.com/databricks/koalas/issues/1084}} This was easily solved by implementing an additional if-statement.
+
+The code then ran in multiple cluster environments; Google Colab\cite{carneiro2018performance}, Databricks and Binder\cite{jupyter2018binder}---each single node having a configuration as close as possible to the MacBook used in the single node approach.

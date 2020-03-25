@@ -1,0 +1,42 @@
+\section{Evaluation \& Discussion}
+
+In the single node approach it took a 2015 MacBook (1.1Ghz dual-core, 8GB RAM) 35 minutes and 28 seconds to build the resulting dataframe:
+
+\begin{verbatim}
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 1385760 entries,
+2017-07-14 04:00:00 to 2020-03-02 11:59:00
+Freq: T
+Columns: 198 entries, RVN to FUN
+dtypes: float64(198)
+memory usage: 2.1 GB
+\end{verbatim}
+
+As expected the memory gets maxed out during this process. But that is surprisingly well handled by the operating system through activating its swap memory. And even though the swap file got as big as 3.86GB and is an obvious constraint to the processing speed, it is good to know that the process is not entirely impossible on a single node.
+
+Not so much luck on the distributed alternative. The biggest problem were the error messages thrown by the three cluster environments this experiment was performed on. All three of them returned the same very unhelpful errors (with hundred of lines) which could only loosely be tied to mismatching Java versions. Multiple Java packages and versions were tried out (Oracle JDK, OpenJDK) but to no avail:
+
+\begin{verbatim}
+Py4JJavaError:
+An error occurred while calling
+o89554.collectToPython.
+: java.lang.StackOverflowError    
+\end{verbatim}
+
+For what is is worth; it did take Colab only 16 minutes and 3 seconds to fully load the files and generate this error message. The code was executed successfully in all three cases but the resulting dataframe or any of its attributes remained uncallable.
+
+\subsection{Reproducibility}
+
+Much of the fact that \texttt{Koalas} failed to work 'out-of-the-box' has to do with the underlying configurations of the servers. A considerable part of this research was spent on these configurations. And although it is not the focus of the experiment, it does play an important role. Therefore a GitHub repository\footnote{\url{https://github.com/jorijnsmit/uva-pandas\_vs\_koalas}} has been made public, including configuration files for Binder. Binder is a service that starts a virtual machine and renders an environment from scratch, strictly based on a repository's specific branch, tag or commit and the configuration files it contains. In this case this is a \texttt{conda} environment based on \texttt{environment.yml}. This ensures reproducible results with consistent package versions. The source for this configuration file is included in the appendix. Visit the repository itself to see it action.
+
+\subsection{Conclusion}
+
+The main question that this paper is trying to answer is: when a \texttt{pandas} dataframe becomes too big for memory, can Koalas provide an easy transition to parallel processing and how much better does it then perform?
+
+In the single node approach, we saw the rather surprising result that swap memory can grow to quite large sizes compares to the RAM. And albeit slower, it does create a very low threshold for continuing to work on these datasets without having to change your existing system or its configuration. The only requirement being that the use of swap memory is enabled.
+
+Unfortunately the results in regards to parallel processing are not so clear. We do see a faster processing time, almost two-fold. This can also be due to the processor speed varying in both experiments. Also we don't know if the dataframe was actually built correctly; the object is never accessible. And because of this, \texttt{Koalas} is not a viable solution to the memory problem of \texttt{pandas} in this experiment. It is probable that the errors thrown on all three (!) cluster environments can be solved. For this particular task however, it is obvious that it is not worth the additional setup time. \textbf{\texttt{Koalas} is not able to provide the easy transition it promises. It appears it would be faster, but this can not be said with any certainty.} Swap memory is a wonderful saviour in the single node approach and is in this experiment the best method to solve situations in which the dataset does not fit in memory anymore.
+
+\texttt{Koalas} makes for a persuasive alternative. As can be seen from the source code, the changes that need to be made are minimal. Active development of the package will further improve this. It is however not the API which is causing the problems but the back-end configuration. Running into Java error messages is unexpected and not what a Python developer or data scientist is hoping for when trying to find an easy way to scale a \texttt{pandas} project. Unless presented with a fully working setup of multiple nodes able to deal with \texttt{Koalas} without fault, closer-to-home solutions such as chunking, optimising memory use and swap memory are a lot more realistic in solving "big data" memory issues with \texttt{pandas}. 
+
+Lastly something can be said about the setup of the experiment itself. Parallel processing benefits the most from heavy processes that can run simultaneously. And although it is true that the process of loading a CSV file from disk can be parallelised, it also creates a new problem. Clusters are more likely to use network attached storage (NAS), opposed to having its own dedicated hard-disks. In retrospect it appears that the speed at which the data can be read from disk into memory can be a substantial factor here. To make a good comparison between single and parallel processing, an experiment which relies more on computational power instead of memory loading would be more suited.

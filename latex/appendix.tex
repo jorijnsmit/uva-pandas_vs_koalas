@@ -1,0 +1,83 @@
+\appendix
+
+\section{Source Code}
+
+\subsection{Single Node Approach}
+
+\begin{verbatim}
+import os
+import pandas as pd
+
+result = pd.DataFrame([])
+for filename in os.listdir(base_path):
+    full_path = f'{base_path}/{filename}'
+    name = filename.split('-')[0]
+    # (1) load file in memory
+    new = pd.read_csv(full_path)
+    # (2) compute index based on timestamp
+    new['open_time'] = pd.to_datetime(
+        new['open_time'], 
+        unit='ms'
+    )
+    new = new.set_index('open_time', drop=True)
+    # (3) compute single price per minute
+    new[name] = (new['open'] + new['close']) / 2
+    # (4) join price column to the result dataframe
+    result = result.join(new[name], how='outer')
+# (5) resample to 1 minute intervals and forward fill
+result = result.resample('1min').asfreq().ffill()
+\end{verbatim}
+
+\newpage
+
+\subsection{Parallel Approach}
+
+\begin{verbatim}
+import os
+import databricks.koalas as ks
+
+first_run = True
+for filename in os.listdir(base_path):
+    full_path = f'{base_path}/{filename}'
+    name = filename.split('-')[0]
+    # (1) load file in memory
+    new = ks.read_csv(full_path)
+    # (2) compute index based on timestamp
+    new['open_time'] = ks.to_datetime(
+        new['open_time'],
+        unit='ms'
+    )
+    new = new.set_index('open_time', drop=True)
+    # (3) compute single price per minute
+    new[name] = (new['open'] + new['close']) / 2
+    # (4) join price column to the result dataframe
+    if first_run:
+        result = ks.DataFrame(new[name])
+        first_run = False
+    else:
+        result = result.join(new[name], how='outer')
+# (5) resample to 1 minute intervals and forward fill
+result = result.resample('1min').asfreq().ffill()
+\end{verbatim}
+
+\subsection{Anaconda Configuration}
+
+\begin{verbatim}
+name: pandas_vs_koalas
+channels:
+  - conda-forge
+dependencies:
+  - arrow-cpp
+  - cython
+  - htop
+  - ipyparallel
+  - koalas
+  - openjdk
+  - pandas
+  - pip
+  - pyarrow=0.8.0
+  - python=3.7
+  - pyspark
+  - pip:
+    - gsutil
+\end{verbatim}

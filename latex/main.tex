@@ -1,0 +1,39 @@
+\documentclass[sigchi, nonacm]{acmart}
+
+\usepackage{hyperref}
+
+\setcounter{secnumdepth}{2}
+
+\begin{document}
+
+\title{Does \texttt{pandas} Stop Where Big Data Begins?}
+
+\author{J.J.H. Smit}
+\affiliation{%
+    10321977 \\
+    \institution{University of Amsterdam}
+}
+\email{jorijn.smit@student.uva.nl}
+
+\begin{abstract}
+    The popular data science tool \texttt{pandas} is limited by the fact that it needs to load all data into memory (plus overhead) in order to view or manipulate it. This paper researches methods that deal with situations in which there is more data than memory available. A thorough comparison with \texttt{Koalas} is made, a package which tries to mimic \texttt{pandas}' API but performs its processes using the parallel processing engine Apache Spark. However, due to its configuration, it is not as easy to deal with as \texttt{pandas}. In this experiment, letting \texttt{pandas} make use of swap memory is therefore a more efficient method of dealing with memory overload.
+\end{abstract}
+
+\keywords{\texttt{pandas}, \texttt{Koalas}, swap memory, parallel processing}
+
+\maketitle
+
+%\input{proposal}
+\input{introduction}
+\input{implementation}
+\input{evaluation}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{bib}
+
+\newpage
+
+\input{appendix}
+
+\end{document}
+\endinput

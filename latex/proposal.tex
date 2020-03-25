@@ -1,0 +1,46 @@
+\section{Introduction}
+
+% an introduction that motivates the topic and explains why it is interesting and relevant
+
+Over the last year or so, I think I can say that \texttt{pandas}\footnote{https://pandas.pydata.org/} has easily been my favourite data analysis and manipulation tool. Because it has been built on top of Python, it is super easy to incorporate into bigger programming projects. The API is also very \textit{pythonic} in the sense that code written in \texttt{pandas} is very readable and easy to understand. Alternatives such as \texttt{R} lack this portability and readability.
+
+One thing \texttt{pandas} isn't so good at however is computational efficiency. Python itself is of course not the fastest languages out there, and \texttt{pandas} being built on top of that then doesn't help. Yes, \texttt{pandas} uses a lot of \texttt{numpy}\footnote{https://numpy.org/} where possible and even \texttt{Cython}\footnote{https://cython.org/} in certain cases \cite[p.~4]{mckinney2012python}---which is great---but this only solves part of the issues.
+
+In order to analyse or manipulate a dataset, \texttt{pandas} needs to fully load it into memory. A first problem we then encounter is that there is quite some memory overhead; for example a simple comma-separated values (CSV) file of 30.2MB already needs 47.8MB of memory as a \texttt{pandas DataFrame}. And this is before performing any manipulations! Does this mean we have to reserve almost twice the storage space in memory in order to just look at the data? A more pressing question then becomes: what happens when the dataset doesn't fit in memory anymore? Are we then restricted from using \texttt{pandas} completely? Is \texttt{pandas} only suitable for "laptop sized" or "small" data?
+
+\section{Related Work}
+
+% a related work section that points to the most relevant related work
+
+A very promising solution to the limits of \texttt{pandas} is \texttt{Koalas}, introduced last year by Databricks \cite{koalas_announced}. It tries to bridge the gap between \texttt{pandas} and Apache Spark by making the \texttt{pandas} API available in a big data environment. Dask \footnote{https://docs.dask.org/en/latest/dataframe.html} provides a similar alternative to \texttt{pandas}' way of representing a dataset: \texttt{dask.dataframe}. Again, it mimics the \texttt{pandas} API and parallelises it quietly in the background. For both of these packages however, we should ask whether it offers all the features and functions \texttt{pandas} has.
+
+\section{Research Questions}
+
+% a section with a main scientific research questions
+
+The main question that I propose to research is the following: \textbf{what methods exist to keep using \texttt{pandas} on datasets that do not fit in memory?}
+
+In order to do so, these sub-questions will be researched first:
+
+\begin{itemize}
+    \item How does \texttt{pandas} represent a \texttt{DataFrame} internally?
+    \item How can \texttt{pandas}' memory use be minimised?
+    \item Are there any workarounds to keep using \texttt{pandas}, even when not enough memory can be allocated?
+    \item Are \texttt{Koalas} or \texttt{Dask} complete alternatives to \texttt{pandas} in cases where the dataset has to be handled in parallel?
+\end{itemize}
+
+\section{Approach}
+
+% a section with the approach, i.e. the main ideas that you want to try, worked out to the point that these are understandable. 
+
+\subsection{Representation \& Optimisation}
+
+To truly get a good understanding of \texttt{pandas}' limitations, I would like to know how a \texttt{DataFrame} is represented internally. Why is there such an overhead in the memory use and what is it for? A common problem is the so called high water mark policy, which states that \texttt{pandas} always takes up as much memory as the maximum amount it needed in that session. So even after deleting a variable, \texttt{pandas} will still keep that memory reserved. Is this relevant to our problem?
+
+With the knowledge of \textit{how} \texttt{pandas} uses its memory, we can then start to optimise it. Some quick research learns that memory use is very dependent on the various data types (\texttt{dtypes}) the \texttt{DataFrame} contains \cite[p.~833]{pandas_docs_mem}. What \texttt{dtypes} work best and how much memory can be gained?
+
+\subsection{Workarounds \& Alternatives}
+
+A commonly known workaround in \texttt{pandas} is to load the data in chunks. This is not parallelisation yet, merely processing the data in series. Maybe this is already a good enough solution?
+
+Both \texttt{Koalas} and \texttt{Dask} sound great in theory. But I doubt they can provide a complete replacement for all \texttt{pandas} features. By trying them out on a large enough dataset, I want to discover what they have to offer and what their limitations are. Also, a question that has to be answered is whether parallelisation is (much) faster than processing in chunks and worth the effort.
